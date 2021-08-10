@@ -3,30 +3,27 @@ name: github pages
 on:
   push:
     branches:
-      - source
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
-      - name: Checkout submodules
-        shell: bash
-        run: |
-          git submodule sync --recursive
-          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
-          hugo-version: '0.65.3'
+          hugo-version: '0.74.3'
 
       - name: Build
-        run: hugo --minify
+        run: hugo --minify -s exampleSite --themesDir ../..
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          publish_branch: master
+          publish_dir: ./exampleSite/public
